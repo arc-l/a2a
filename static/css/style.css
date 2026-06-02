@@ -157,6 +157,8 @@ a:hover { text-decoration: underline; }
   font-size: 0.95rem;
   margin-bottom: 28px;
 }
+.affiliations p { margin: 6px 0; }
+.affiliations .notes { font-size: 0.88rem; }
 .affiliations code {
   background: rgba(255,255,255,0.7);
   padding: 1px 6px;
