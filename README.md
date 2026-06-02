@@ -41,16 +41,6 @@ real-time grounding model (**A2A-GroundingModel**) and a manipulation policy (**
 | **A2A-GroundingModel** | Real-time task-conditioned part grounding (SAM3-based) | 🚧 Coming soon |
 | **A2A-Policy** | Manipulation policy guided by affordance priors | 🚧 Coming soon |
 
-## Project page (this repo)
-
-This repository currently hosts the project website (`index.html` + `static/`), deployed via
-GitHub Pages. To preview locally:
-
-```bash
-python3 -m http.server 8000
-# open http://localhost:8000
-```
-
 ## Citation
 
 ```bibtex
