@@ -4,10 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description"
-        content="Affordance2Action (A2A): Task-Conditioned Part Affordance Grounding for Real-Time Manipulation.">
+        content="Affordance2Action (A2A): Task-Conditioned Scene-level Affordance Grounding for Real-Time Manipulation.">
   <meta property="og:title" content="Affordance2Action (A2A)">
   <meta property="og:description"
-        content="A benchmark-centered learning framework for scene-level, task-conditioned part affordance grounding.">
+        content="A benchmark-centered learning framework for scene-level, scene-level, task-conditioned affordance grounding.">
   <meta property="og:image" content="static/images/A2A-teaser.png">
   <meta name="twitter:card" content="summary_large_image">
   <title>Affordance2Action (A2A)</title>
@@ -71,7 +71,7 @@
 
       <!-- ===== Link buttons ===== -->
       <div class="links">
-        <a class="link-btn" href="#" id="paper-link">
+        <a class="link-btn" href="static/A2A_paper.pdf" id="paper-link">
           <span class="icon">&#128196;</span> Paper
         </a>
         <a class="link-btn" href="#" id="arxiv-link">
@@ -91,7 +91,7 @@
   <section class="section teaser">
     <div class="container">
       <figure>
-        <img src="static/images/A2A-teaser.png?v=2" alt="Overview of Affordance2Action (A2A)">
+        <img src="static/images/A2A-teaser.png?v=3" alt="Overview of Affordance2Action (A2A)">
         <figcaption>
           <strong>Overview of Affordance2Action (A2A).</strong>
           Our benchmark-centered learning framework first builds <strong>A2A-Bench</strong> through
@@ -116,7 +116,7 @@
         benchmarks remain misaligned with this setting, as they typically focus on grasping or
         object-level affordances, rely on synthetic scenes, or assume a single instruction&ndash;region
         correspondence. We present <strong>Affordance2Action (A2A)</strong>, a benchmark-centered
-        learning framework for scene-level, task-conditioned part affordance grounding. At its core is
+        learning framework for scene-level, scene-level, task-conditioned affordance grounding. At its core is
         <strong>A2A-Bench</strong>, a manipulation-oriented benchmark that covers both single-region
         and multi-region instruction correspondences in everyday scenes, with the latter highlighting
         the ambiguity and diversity of affordance grounding in realistic multi-object environments. To
@@ -164,7 +164,7 @@
     <div class="container">
       <h2 class="section-title">A2A-AffordGen: Agent-Assisted Annotation</h2>
       <figure>
-        <img src="static/images/A2A-AffordGen.png?v=2" alt="A2A-AffordGen annotation pipeline">
+        <img src="static/images/A2A-AffordGen.png?v=3" alt="A2A-AffordGen annotation pipeline">
         <figcaption>
           Starting from large-scale natural images, language-model filtering identifies
           manipulation-relevant tasks, then interactive part segmentation and an iterative mask-out
@@ -178,7 +178,7 @@
     <div class="container">
       <h2 class="section-title">A2A-GroundingModel: Real-Time Affordance Grounding</h2>
       <figure>
-        <img src="static/images/A2A-groundingmodel.png?v=2" alt="A2A grounding model architecture">
+        <img src="static/images/A2A-groundingmodel.png?v=3" alt="A2A grounding model architecture">
         <figcaption>
           We adapt SAM3 into a task-conditioned affordance part segmentor that predicts masks directly
           from image&ndash;instruction pairs &mdash; no point or box prompts at inference. Staged
@@ -189,25 +189,41 @@
     </div>
   </section>
 
+  <!-- ===== A2A-Policy ===== -->
+  <section class="section" id="policy">
+    <div class="container narrow">
+      <h2 class="section-title">A2A-Policy: Affordance-Guided Manipulation</h2>
+      <p class="abstract">
+        At the policy level, <strong>A2A-Policy</strong> integrates the masks predicted by
+        A2A-GroundingModel into a language-conditioned manipulation policy as
+        <strong>structured visual&ndash;action priors</strong>. Rather than forcing the policy to infer
+        task-relevant regions implicitly from raw observations and demonstrations, the grounded
+        functional regions explicitly direct the policy toward actionable parts of the scene. This
+        converts A2A-Bench supervision into policy-ready guidance, reducing the data burden, improving
+        interpretability, and supporting real-time deployment on a real robot arm.
+      </p>
+    </div>
+  </section>
+
   <!-- ===== Real-world results ===== -->
-  <section class="section" id="results">
+  <section class="section alt" id="results">
     <div class="container">
       <h2 class="section-title">Real-World Manipulation</h2>
       <p class="center-note">A2A-Policy deployed on a real robot arm across everyday manipulation tasks.</p>
       <div class="demo-grid">
-        <figure><img src="static/images/A2A-realworld-demos-microwave.png?v=2" alt="Open microwave"><figcaption>Open microwave</figcaption></figure>
-        <figure><img src="static/images/A2A-realworld-demos-cube.png?v=2" alt="Stack cube"><figcaption>Stack cube</figcaption></figure>
-        <figure><img src="static/images/A2A-realworld-demos-phone.png?v=2" alt="Place phone"><figcaption>Place phone</figcaption></figure>
-        <figure><img src="static/images/A2A-realworld-demos-cup.png?v=2" alt="Manipulate cup"><figcaption>Manipulate cup</figcaption></figure>
+        <figure><img src="static/images/A2A-realworld-demos-microwave.png?v=3" alt="Open microwave"><figcaption>Open microwave</figcaption></figure>
+        <figure><img src="static/images/A2A-realworld-demos-cube.png?v=3" alt="Stack cube"><figcaption>Stack cube</figcaption></figure>
+        <figure><img src="static/images/A2A-realworld-demos-phone.png?v=3" alt="Place phone"><figcaption>Place phone</figcaption></figure>
+        <figure><img src="static/images/A2A-realworld-demos-cup.png?v=3" alt="Manipulate cup"><figcaption>Manipulate cup</figcaption></figure>
       </div>
     </div>
   </section>
 
-  <section class="section alt">
+  <section class="section">
     <div class="container">
       <h2 class="section-title">Comparison with Baselines</h2>
       <figure>
-        <img src="static/images/Comparison.png?v=2" alt="Qualitative comparison with baselines">
+        <img src="static/images/Comparison.png?v=3" alt="Qualitative comparison with baselines">
         <figcaption>
           A2A exposes substantial gaps in generic segmentation, VLM-based grounding, and affordance
           distillation baselines, while improving task-level localization.
