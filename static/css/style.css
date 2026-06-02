@@ -165,6 +165,12 @@ a:hover { text-decoration: underline; }
   color: var(--ink);
 }
 .affiliations .contact strong { color: var(--accent); }
+.affiliations .internship {
+  margin-top: 10px;
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--muted);
+}
 .affiliations code {
   background: rgba(255,255,255,0.7);
   padding: 1px 6px;
