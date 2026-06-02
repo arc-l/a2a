@@ -239,9 +239,8 @@ figure img {
   box-shadow: 0 14px 32px rgba(15, 23, 42, 0.10);
   display: block;
 }
-figure.square img {
-  border-radius: 0;
-  padding: 0;
+figure.soft img {
+  border-radius: 6px;
 }
 
 figcaption {
