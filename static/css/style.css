@@ -157,8 +157,14 @@ a:hover { text-decoration: underline; }
   font-size: 0.95rem;
   margin-bottom: 28px;
 }
-.affiliations p { margin: 6px 0; }
+.affiliations p { margin: 4px 0; }
 .affiliations .notes { font-size: 0.88rem; }
+.affiliations .contact {
+  margin-top: 12px;
+  font-size: 0.92rem;
+  color: var(--ink);
+}
+.affiliations .contact strong { color: var(--accent); }
 .affiliations code {
   background: rgba(255,255,255,0.7);
   padding: 1px 6px;
