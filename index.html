@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description"
+        content="Affordance2Action (A2A): Task-Conditioned Part Affordance Grounding for Real-Time Manipulation.">
+  <meta property="og:title" content="Affordance2Action (A2A)">
+  <meta property="og:description"
+        content="A benchmark-centered learning framework for scene-level, task-conditioned part affordance grounding.">
+  <meta property="og:image" content="static/images/A2A-teaser.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <title>Affordance2Action (A2A)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Source+Serif+4:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="static/css/style.css">
+</head>
+<body class="paper-grid">
+
+  <!-- ===== Top navigation ===== -->
+  <nav class="topnav">
+    <div class="nav-inner">
+      <a class="nav-brand" href="#top">A2A</a>
+      <input type="checkbox" id="nav-toggle" class="nav-toggle">
+      <label for="nav-toggle" class="nav-burger" aria-label="Menu">&#9776;</label>
+      <ul class="nav-links">
+        <li><a href="#abstract">Abstract</a></li>
+        <li><a href="#contributions">Contributions</a></li>
+        <li><a href="#method">Method</a></li>
+        <li><a href="#results">Results</a></li>
+        <li><a href="#bibtex">BibTeX</a></li>
+        <li><a href="https://github.com/arc-l/a2a" class="nav-cta">Code</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- ===== Hero / Title ===== -->
+  <header class="hero" id="top">
+    <div class="container">
+      <p class="venue">CORL 2026 &nbsp;&middot;&nbsp; Under Review</p>
+      <h1 class="title">Affordance2Action&nbsp;(A2A)</h1>
+      <h2 class="subtitle">Task-Conditioned Part Affordance Grounding<br>for Real-Time Manipulation</h2>
+
+      <div class="authors">
+        <span class="author"><a href="#">Author One</a><sup>1</sup></span>
+        <span class="author"><a href="#">Author Two</a><sup>1</sup></span>
+        <span class="author"><a href="#">Author Three</a><sup>1</sup></span>
+      </div>
+      <div class="affiliations">
+        <span><sup>1</sup>Affiliation &mdash; update authors and links in <code>index.html</code></span>
+      </div>
+
+      <!-- ===== Link buttons ===== -->
+      <div class="links">
+        <a class="link-btn" href="#" id="paper-link">
+          <span class="icon">&#128196;</span> Paper
+        </a>
+        <a class="link-btn" href="#" id="arxiv-link">
+          <span class="icon">&#119987;</span> arXiv
+        </a>
+        <a class="link-btn" href="https://github.com/arc-l/a2a" id="code-link">
+          <span class="icon">&#128187;</span> Code
+        </a>
+        <a class="link-btn" href="#" id="data-link">
+          <span class="icon">&#128202;</span> A2A-Bench
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== Teaser ===== -->
+  <section class="section teaser">
+    <div class="container">
+      <figure>
+        <img src="static/images/A2A-teaser.png?v=2" alt="Overview of Affordance2Action (A2A)">
+        <figcaption>
+          <strong>Overview of Affordance2Action (A2A).</strong>
+          Our benchmark-centered learning framework first builds <strong>A2A-Bench</strong> through
+          <strong>A2A-AffordGen</strong>, scaling one-to-many affordance annotations in natural
+          multi-object scenes. A2A-Bench's supervision drives <strong>A2A-GroundingModel</strong> and
+          <strong>A2A-Policy</strong> for real-time affordance grounding and robot manipulation.
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ===== Abstract ===== -->
+  <section class="section" id="abstract">
+    <div class="container narrow">
+      <h2 class="section-title">Abstract</h2>
+      <p class="abstract">
+        Task-conditioned manipulation requires robots to localize object parts that support the
+        intended action, rather than recognizing object categories alone. This problem is
+        part-level, scene-dependent, and inherently <em>one-to-many</em>: the same object may afford
+        different interactions across tasks, while a single task can admit multiple valid interaction
+        regions in cluttered scenes. Existing affordance datasets and benchmarks remain misaligned
+        with this setting, as they are often grasp-centric, object-centric, synthetic, or limited to
+        one-to-one instruction&ndash;region annotations. We present
+        <strong>Affordance2Action (A2A)</strong>, a benchmark-centered learning framework for
+        scene-level, task-conditioned part affordance grounding. At its core is
+        <strong>A2A-Bench</strong>, a robot-oriented benchmark linking manipulation intent to multiple
+        actionable functional regions in everyday scenes. To construct it at scale, we build
+        <strong>A2A-AffordGen</strong>, an agent-assisted annotation pipeline that combines
+        language-model filtering, interactive part segmentation, instance-level mask-out refinement,
+        task-reasoning instruction generation, and human verification. A2A-Bench's supervision readily
+        enables training a real-time affordance grounding model and integrating its predictions into
+        task-conditioned manipulation policies. Experiments show that A2A exposes substantial gaps in
+        generic segmentation, VLM-based grounding, and affordance distillation baselines, while
+        improving task-level localization and downstream manipulation.
+      </p>
+    </div>
+  </section>
+
+  <!-- ===== Contributions ===== -->
+  <section class="section alt" id="contributions">
+    <div class="container">
+      <h2 class="section-title">Contributions</h2>
+      <div class="cards">
+        <div class="card">
+          <h3>A2A-Bench</h3>
+          <p>A scene-level, task-conditioned, <strong>one-to-many</strong> benchmark for robot-oriented
+          part affordance grounding, associating manipulation intents with multiple actionable
+          functional regions in real-world scenes.</p>
+        </div>
+        <div class="card">
+          <h3>A2A-AffordGen</h3>
+          <p>An agent-assisted data construction pipeline that scales multi-object affordance
+          annotation via language-model filtering, interactive part segmentation, instance-level
+          mask-out refinement, task-reasoning instruction generation, and human verification.</p>
+        </div>
+        <div class="card">
+          <h3>A2A-GroundingModel &amp; A2A-Policy</h3>
+          <p>A2A-GroundingModel adapts <strong>SAM3</strong> for real-time task-conditioned part
+          grounding from image&ndash;instruction pairs, while A2A-Policy incorporates the predicted
+          masks as structured visual priors for manipulation.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Method ===== -->
+  <section class="section" id="method">
+    <div class="container">
+      <h2 class="section-title">A2A-AffordGen: Agent-Assisted Annotation</h2>
+      <figure>
+        <img src="static/images/A2A-AffordGen.png?v=2" alt="A2A-AffordGen annotation pipeline">
+        <figcaption>
+          Starting from large-scale natural images, language-model filtering identifies
+          manipulation-relevant tasks, then interactive part segmentation and an iterative mask-out
+          strategy annotate <em>multiple</em> valid affordance regions per instruction.
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="section alt">
+    <div class="container">
+      <h2 class="section-title">A2A-GroundingModel: Real-Time Affordance Grounding</h2>
+      <figure>
+        <img src="static/images/A2A-groundingmodel.png?v=2" alt="A2A grounding model architecture">
+        <figcaption>
+          We adapt SAM3 into a task-conditioned affordance part segmentor that predicts masks directly
+          from image&ndash;instruction pairs &mdash; no point or box prompts at inference. Staged
+          instruction adaptation with text-conditioned visual prompt injection bridges explicit part
+          descriptions and implicit task intent while preserving SAM3's zero-shot priors.
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ===== Real-world results ===== -->
+  <section class="section" id="results">
+    <div class="container">
+      <h2 class="section-title">Real-World Manipulation</h2>
+      <p class="center-note">A2A-Policy deployed on a real robot arm across everyday manipulation tasks.</p>
+      <div class="demo-grid">
+        <figure><img src="static/images/A2A-realworld-demos-microwave.png?v=2" alt="Open microwave"><figcaption>Open microwave</figcaption></figure>
+        <figure><img src="static/images/A2A-realworld-demos-cube.png?v=2" alt="Stack cube"><figcaption>Stack cube</figcaption></figure>
+        <figure><img src="static/images/A2A-realworld-demos-phone.png?v=2" alt="Place phone"><figcaption>Place phone</figcaption></figure>
+        <figure><img src="static/images/A2A-realworld-demos-cup.png?v=2" alt="Manipulate cup"><figcaption>Manipulate cup</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="section alt">
+    <div class="container">
+      <h2 class="section-title">Comparison with Baselines</h2>
+      <figure>
+        <img src="static/images/Comparison.png?v=2" alt="Qualitative comparison with baselines">
+        <figcaption>
+          A2A exposes substantial gaps in generic segmentation, VLM-based grounding, and affordance
+          distillation baselines, while improving task-level localization.
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ===== BibTeX ===== -->
+  <section class="section" id="bibtex">
+    <div class="container narrow">
+      <h2 class="section-title">BibTeX</h2>
+      <pre class="bibtex"><code>@inproceedings{a2a2026,
+  title     = {Affordance2Action (A2A): Task-Conditioned Part Affordance
+               Grounding for Real-Time Manipulation},
+  author    = {Anonymous},
+  booktitle = {Conference on Robot Learning (CoRL)},
+  year      = {2026},
+}</code></pre>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <p>
+        Page template adapted from the
+        <a href="https://github.com/nerfies/nerfies.github.io">Nerfies</a> academic project page.
+        Source available under
+        <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>.
+      </p>
+    </div>
+  </footer>
+
+</body>
+</html>
