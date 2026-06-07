@@ -91,11 +91,15 @@
     </div>
   </header>
 
-  <!-- ===== Teaser ===== -->
-  <section class="section teaser">
+  <!-- ===== Overview video ===== -->
+  <section class="section teaser" id="overview">
     <div class="container">
       <figure>
-        <img src="static/images/A2A-teaser.png?v=3" alt="Overview of Affordance2Action (A2A)">
+        <video class="hero-video" controls playsinline preload="metadata"
+               poster="static/images/A2A-teaser.png?v=3">
+          <source src="static/videos/A2A-overview.mp4" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
         <figcaption>
           <strong>Overview of Affordance2Action (A2A).</strong>
           Our benchmark-centered learning framework first builds <strong>A2A-Bench</strong> through
@@ -175,6 +179,21 @@
           strategy annotate <em>multiple</em> valid affordance regions per instruction.
         </figcaption>
       </figure>
+
+      <div class="video-grid two">
+        <figure>
+          <video controls autoplay muted loop playsinline preload="metadata">
+            <source src="static/videos/A2A-affordgen-refine-sam3.mp4" type="video/mp4">
+          </video>
+          <figcaption>Refining a SAM3 mask into precise affordance regions.</figcaption>
+        </figure>
+        <figure>
+          <video controls autoplay muted loop playsinline preload="metadata">
+            <source src="static/videos/A2A-affordgen-from-scratch.mp4" type="video/mp4">
+          </video>
+          <figcaption>Annotating multiple masks from scratch in a multi-object scene.</figcaption>
+        </figure>
+      </div>
     </div>
   </section>
 
@@ -190,6 +209,28 @@
           descriptions and implicit task intent while preserving SAM3's zero-shot priors.
         </figcaption>
       </figure>
+
+      <p class="center-note">Real-time task-conditioned affordance grounding from natural-language instructions.</p>
+      <div class="video-grid three">
+        <figure>
+          <video controls autoplay muted loop playsinline preload="metadata">
+            <source src="static/videos/A2A-grounding-hold-the-mug.mp4" type="video/mp4">
+          </video>
+          <figcaption>&ldquo;Hold the mug&rdquo;</figcaption>
+        </figure>
+        <figure>
+          <video controls autoplay muted loop playsinline preload="metadata">
+            <source src="static/videos/A2A-grounding-open-the-bottle.mp4" type="video/mp4">
+          </video>
+          <figcaption>&ldquo;Open the bottle&rdquo;</figcaption>
+        </figure>
+        <figure>
+          <video controls autoplay muted loop playsinline preload="metadata">
+            <source src="static/videos/A2A-grounding-seat-on-the-chair.mp4" type="video/mp4">
+          </video>
+          <figcaption>&ldquo;Seat on the chair&rdquo;</figcaption>
+        </figure>
+      </div>
     </div>
   </section>
 

@@ -229,7 +229,8 @@ a:hover { text-decoration: underline; }
 .teaser { padding-top: 40px; padding-bottom: 40px; }
 
 figure { margin: 0; }
-figure img {
+figure img,
+figure video {
   width: 100%;
   height: auto;
   border-radius: 16px;
@@ -239,9 +240,27 @@ figure img {
   box-shadow: 0 14px 32px rgba(15, 23, 42, 0.10);
   display: block;
 }
+figure video {
+  padding: 0;
+  background: #000;
+}
+.hero-video {
+  aspect-ratio: 16 / 9;
+  object-fit: contain;
+}
 figure.soft img {
   border-radius: 6px;
 }
+
+/* ===== Video grids ===== */
+.video-grid {
+  display: grid;
+  gap: 22px;
+  margin-top: 28px;
+}
+.video-grid.two { grid-template-columns: repeat(2, 1fr); }
+.video-grid.three { grid-template-columns: repeat(3, 1fr); }
+.video-grid figcaption { font-weight: 600; color: var(--ink); }
 
 figcaption {
   margin-top: 14px;
@@ -312,6 +331,8 @@ figcaption {
 @media (max-width: 820px) {
   .cards { grid-template-columns: 1fr; }
   .demo-grid { grid-template-columns: 1fr; }
+  .video-grid.two,
+  .video-grid.three { grid-template-columns: 1fr; }
   .title { font-size: 2.5rem; }
   .subtitle { font-size: 1.3rem; }
 
