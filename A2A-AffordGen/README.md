@@ -134,6 +134,7 @@ data/
 
 | Asset | What it is | Where to get it |
 |---|---|---|
+| **AffordGen annotator (LoRA)** | Our trained checkpoint — load with `inference/infer_affordgen.py` | [Google Drive](https://drive.google.com/drive/folders/1Sfw3K5qpygvPqQ-WrcuzXvrlYSLwtfef?usp=drive_link) |
 | **A2A-Bench** | The released benchmark (images, masks, instructions, splits) | Released separately — see the [project page](https://arc-l.github.io/a2a/) |
 | **SAM3 checkpoint** | Click backend + text baseline | A2A-GroundingModel / SAM3-I release |
 | **Qwen3.5-9B**, **Qwen3-VL-32B-Instruct** | Base models | Their official model hubs |
@@ -303,6 +304,10 @@ python train/plot_training_curve.py runs/affordgen_lora/<run>/logging.jsonl
 ## 3. Testing / evaluation
 
 ### AffordGen annotator (agent + SAM3 click loop)
+
+> **Pretrained checkpoint:** download our LoRA annotator from
+> [Google Drive](https://drive.google.com/drive/folders/1Sfw3K5qpygvPqQ-WrcuzXvrlYSLwtfef?usp=drive_link)
+> and point `CKPT` at the extracted `checkpoint-*` directory.
 
 Runs the trained VLM and SAM3 over the manifest, performing up to `--max_steps`
 clicks per image (stopping early at `--stop_iou`), and reports IoU against the
