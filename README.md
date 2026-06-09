@@ -9,11 +9,12 @@
 
 ---
 
-> ## 🚧 Code Coming Soon
+> ## 🚀 Code Release (in progress)
 >
-> The code for **A2A-AffordGen**, **A2A-GroundingModel**, **A2A-Policy**, and the **A2A-Bench**
-> dataset is being cleaned up for release. **Please stay tuned** — we will update this repository
-> as soon as it is ready. ⭐ Star/Watch the repo to get notified.
+> **A2A-AffordGen** — our agent-assisted annotation pipeline — is now available in
+> [`A2A-AffordGen/`](./A2A-AffordGen), and the **A2A-Bench** [dataset card](./A2A-Bench) is up
+> (data hosting in progress). **A2A-GroundingModel** and **A2A-Policy** are still being cleaned up
+> for release. ⭐ Star/Watch the repo to get notified.
 
 ---
 
@@ -32,12 +33,12 @@ real-time grounding model (**A2A-GroundingModel**) and a manipulation policy (**
 
 - 🌐 **Project page:** https://arc-l.github.io/a2a/
 
-## Components (to be released)
+## Components
 
 | Component | Description | Status |
 |---|---|---|
-| **A2A-Bench** | Scene-level, task-conditioned, one-to-many affordance benchmark | 🚧 Coming soon |
-| **A2A-AffordGen** | Agent-assisted annotation pipeline | 🚧 Coming soon |
+| **A2A-AffordGen** | Agent-assisted annotation pipeline | ✅ [Released](./A2A-AffordGen) |
+| **A2A-Bench** | Scene-level, task-conditioned, one-to-many affordance benchmark | 📄 [Dataset card](./A2A-Bench) · data hosting in progress |
 | **A2A-GroundingModel** | Real-time task-conditioned part grounding (SAM3-based) | 🚧 Coming soon |
 | **A2A-Policy** | Manipulation policy guided by affordance priors | 🚧 Coming soon |
 
