@@ -5,7 +5,7 @@
 #   - ms-swift         (training backend: `pip install ms-swift`)
 #   - vLLM             (labeler-VLM server: `pip install vllm`)
 #   - sam3             (the A2A-GroundingModel / SAM3-I package — provides `sam3.*`)
-#   - isegm            (SimpleClick — provides `isegm.inference.clicker.Clicker`)
+#   - isegm            (SimpleClick) — clone into third_party/SimpleClick (see third_party/README.md)
 #
 # The exact frozen environment we used is pinned in env.full.txt.
 

@@ -1,5 +1,5 @@
 """
-Validate SegAgent Swift JSONL training data.
+Validate AffordGen Swift JSONL training data.
 
 Checks per sample:
   - Valid JSON, correct schema (messages + images)
@@ -14,7 +14,7 @@ Reports stats + any errors found.
 
 Usage:
     python data_process/validate_train_data.py \
-        --jsonl data/affordance/segagent_train/train.jsonl \
+        --jsonl data/affordance/affordgen_train/train.jsonl \
         --max_errors 20
 """
 
@@ -111,7 +111,7 @@ def validate_sample(sample: dict, idx: int) -> list[str]:
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--jsonl",       default="data/affordance/segagent_train/train.jsonl")
+    ap.add_argument("--jsonl",       default="data/affordance/affordgen_train/train.jsonl")
     ap.add_argument("--max_errors",  type=int, default=20, help="stop reporting after N errors")
     ap.add_argument("--sample_rate", type=int, default=1,  help="check every Nth line (1=all)")
     args = ap.parse_args()

@@ -15,6 +15,10 @@ output*/
 *.jsonl
 *.zarr/
 
+# Cloned third-party deps (never commit others' code)
+/sam3/
+/third_party/SimpleClick/
+
 # Logs / scratch
 *.log
 /tmp/

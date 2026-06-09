@@ -10,7 +10,7 @@ results.json was annotated with a different captioning scheme, leading to
 ~50% no_part_match. Using trajs_with_captions should be near 100%.
 
 Reads:
-  - data/affordance/segagent_train/val.jsonl
+  - data/affordance/affordgen_train/val.jsonl
   - data/affordance/trajs_with_captions/*.json
   - data/affordance/train_and_val/val_set/images/
 
@@ -47,9 +47,9 @@ from PIL import Image
 
 
 VAL_ROOT  = Path('data/affordance/train_and_val/val_set')
-VAL_JSONL = Path('data/affordance/segagent_train/val.jsonl')
+VAL_JSONL = Path('data/affordance/affordgen_train/val.jsonl')
 
-# Multiple upstream trajectory sources (must match what gen_segagent_train_data.py used).
+# Multiple upstream trajectory sources (must match what gen_affordgen_train_data.py used).
 TRAJ_SOURCES = [
     Path('data/affordance/trajs_with_captions'),       # primary (dir of *.json)
     Path('data/affordance/traj_and_cropped_images/trajs_filtered.json'),  # multi-object extra

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-data_checker.py — Visualize a SegAgent training trajectory from train.jsonl.
+data_checker.py — Visualize a AffordGen training trajectory from train.jsonl.
 
 For a selected trajectory:
   - De-normalizes click coords from the JSONL answer format
@@ -9,7 +9,7 @@ For a selected trajectory:
 
 Usage:
     python data_process/data_checker.py \\
-        --jsonl data/affordance/segagent_train/train.jsonl \\
+        --jsonl data/affordance/affordgen_train/train.jsonl \\
         --traj_index 0 \\
         --sam3_ckpt models/sam3/sam3.pt \\
         --output vis_data_checker/traj_0.png
@@ -52,7 +52,7 @@ def load_trajectories(jsonl_path: str, max_trajs: int = None):
     """Group consecutive JSONL lines into trajectories.
 
     A new trajectory starts whenever the image filename stem has no '__step' in it.
-    Steps of the same trajectory are written consecutively by gen_segagent_train_data.py.
+    Steps of the same trajectory are written consecutively by gen_affordgen_train_data.py.
     """
     trajs = []
     current: list = []
@@ -259,7 +259,7 @@ def draw_figure(image_pil: Image.Image, sam3_results: list,
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--jsonl",
-                    default="data/affordance/segagent_train/train.jsonl")
+                    default="data/affordance/affordgen_train/train.jsonl")
     ap.add_argument("--traj_index", type=int, default=None,
                     help="0-based trajectory index; random if omitted")
     ap.add_argument("--step0_image", default=None,

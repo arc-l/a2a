@@ -32,7 +32,7 @@ OVERLAY_ALPHA = 0.5
 
 
 def apply_green_overlay(image: Image.Image, mask: np.ndarray) -> Image.Image:
-    """Same blending logic as gen_segagent_train_data.py / infer_segagent.py."""
+    """Same blending logic as gen_affordgen_train_data.py / infer_affordgen.py."""
     img = np.array(image, dtype=np.float32)
     if img.shape[:2] != mask.shape:
         raise ValueError(f'image shape {img.shape[:2]} != mask shape {mask.shape}')
