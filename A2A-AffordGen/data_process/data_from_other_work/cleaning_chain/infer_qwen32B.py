@@ -11,19 +11,19 @@ from qwen_vl_utils import process_vision_info
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Qwen-32B Object365 Affordance 预筛选（patch 范围 + 断点续跑）"
+        description="Qwen-32B Object365 Affordance pre-filtering (patch range + resume from checkpoint)"
     )
     parser.add_argument(
         "--gpu", type=str, required=True,
-        help="使用的 GPU 编号，例如 0 或 5,6（建议命令行设置 CUDA_VISIBLE_DEVICES）"
+        help="GPU id(s) to use, e.g. 0 or 5,6 (it is recommended to set CUDA_VISIBLE_DEVICES on the command line)"
     )
     parser.add_argument(
         "--startidx", type=int, required=True,
-        help="起始 patch 编号（例如 0）"
+        help="Start patch index (e.g. 0)"
     )
     parser.add_argument(
         "--endidx", type=int, required=True,
-        help="结束 patch 编号（例如 25，闭区间）"
+        help="End patch index (e.g. 25, inclusive)"
     )
     return parser.parse_args()
 
@@ -39,11 +39,11 @@ def safe_check_image(path: str) -> bool:
 
 def prepare_single_input_qwen(image_path: str, processor, question: str):
     """
-    与你给的 Qwen 脚本一致：
+    Consistent with the Qwen script you provided:
     - messages: image + text
     - apply_chat_template
     - process_vision_info -> mm_data + video_kwargs
-    - 返回 vLLM 所需 dict
+    - return the dict required by vLLM
     """
     if not safe_check_image(image_path):
         return None
@@ -95,12 +95,12 @@ def extract_final_answer(text):
             return clean.split("<answer>")[1].split("<")[0]
         except:
             return clean.split("<answer>")[1]
-    tail = clean[-5:]
-    if "是" in tail:
-        return "是"
-    if "否" in tail:
-        return "否"
-    return "否"
+    tail = clean[-5:].lower()
+    if "yes" in tail:
+        return "yes"
+    if "no" in tail:
+        return "no"
+    return "no"
 
 
 def load_json_list(path: str):
@@ -169,10 +169,10 @@ def process_one_patch(
             ans = extract_final_answer(raw_text)
 
             processed_set.add(img_path)
-            if ans == "是":
+            if ans == "yes":
                 yes_results.append(img_path)
 
-        # 与 GLM 参考一致：batch 级实时写盘，保证断点安全
+        # Consistent with the GLM reference: flush to disk in real time at the batch level to keep checkpoints safe
         dump_json(yes_results, yes_json)
         dump_json(sorted(processed_set), processed_json)
 
@@ -183,7 +183,7 @@ def process_one_patch(
 
 def main():
     args = parse_args()
-    assert args.startidx <= args.endidx, "startidx 必须 <= endidx"
+    assert args.startidx <= args.endidx, "startidx must be <= endidx"
     os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
 
     os.environ["VLLM_MM_LIMIT_PER_PROMPT_VIDEO"] = "0"
@@ -196,57 +196,57 @@ def main():
     MODEL_PATH = "data/robot/Qwen3-VL-32B-Instruct"
 
     QUESTION = (
-        "你现在作为一个用于“筛选 Affordance 图像”的模型，需要判断给定图像中是否存在至少一个"
-        "“以物体为中心、主体明确，且在日常生活中具有典型人类可执行 Affordance 的目标物体”。\n"
-        "本任务的目标是：只保留“典型的、以可交互日常物体为主体”的图像，而过滤掉依靠想象或引申才成立的 Affordance"
-        "（例如柱子、石墩、台阶、雪堆、随机平台等被当成可坐/可跳的情况）。\n"
-        "你必须严格按照以下步骤判断，只能回答：“是” 或 “否”，不要输出任何其它内容。\n\n"
-        "第 1 步：判断是否为“物体为中心、主体明确”的图像\n"
-        "只有在同时满足以下条件时，才认为图像是“物体为中心、主体明确”的：\n"
-        "1. 图像的视觉注意力集中在一个主要物体上，或少数几件强相关的物体上，而不是：\n"
-        "   - 宽广的室外 / 室内大场景（街道、广场、海滩、风景、房间全景等）；\n"
-        "   - 拥挤的人群、复杂街景、商场等多目标混杂场景；\n"
-        "   - 以人物或动物为主体，而物体只是小配件或背景。\n"
-        "2. 该主要物体位于图像中心或显著区域，并且：\n"
-        "   - 在画面中占据明显面积（不是远处很小的点状目标）；\n"
-        "   - 轮廓和形状清晰可见，没有严重遮挡或大面积裁切。\n"
-        "3. 主要物体应该是独立的、可识别的实体物体，而不是：\n"
-        "   - 地面、墙壁、天花板、楼梯、台阶、栏杆、柱子、石块、岩石、雪堆、土堆、台子等环境结构或自然地形；\n"
-        "   - 抽象几何体、纹理、图案、标志牌、路面标线、云彩、风景等。\n"
-        "如果图像不满足以上任意一条（例如：大场景、主体不清晰、物体太小、只有环境结构等），请直接回答：“否”。\n\n"
-        "第 2 步：判断主要物体是否是“典型日常可交互物体”，并具有人类可执行的 Affordance\n"
-        "仅当通过第 1 步后，才继续第 2 步。\n"
-        "1. 主要物体必须是典型的日常人造物体或常见可食用物体，类别应类似于下列这一类物品：\n"
-        "   - 家具与支撑物：chair, couch, bench, bed 等；\n"
-        "   - 餐具与容器：cup, bottle, bowl, plate, spoon, fork, knife, wine_glass 等；\n"
-        "   - 厨房 / 家电：microwave, oven, refrigerator 等；\n"
-        "   - 手持工具与文具：pen, scissors, hammer, axe, toothbrush 等；\n"
-        "   - 电子设备：cell_phone, camera, laptop, keyboard 等；\n"
-        "   - 载具：bicycle, motorcycle 等；\n"
-        "   - 体育器材与球类：soccer_ball, basketball, baseball, tennis_racket, golf_clubs, baseball_bat, badminton, frisbee, "
-        "javelin, discus, skis, snowboard, skateboard, punching_bag 等；\n"
-        "   - 行李与容器：suitcase 等；\n"
-        "   - 常见食物：apple, banana, orange, carrot, broccoli, hot_dog 等。\n"
-        "   如果主要物体明显是环境结构、自然地形或难以命名的抽象形状"
-        "（例如：柱子、石墩、台阶、楼梯、雪堆、岩石、随机台子、地板、墙面等），"
-        "即使它“看上去可以坐/可以跳/可以踢”，也要视为不符合本任务要求，直接回答：“否”。\n"
-        "2. 在主要物体属于上述“典型日常物体”时，再判断它在正常生活情境下，是否自然地支持下列任一人类操作"
-        "（Affordance 标签以英文记述）：\n"
+        "You are now acting as a model for \"filtering Affordance images\", and you need to judge whether the given image contains at least one "
+        "\"object-centric target object with a clear subject that, in everyday life, has a typical human-executable Affordance\".\n"
+        "The goal of this task is: keep only images that are \"typical and centered on an interactable everyday object\", and filter out Affordances that hold only through imagination or extrapolation "
+        "(for example, cases where pillars, stone blocks, steps, snow piles, random platforms, etc. are treated as sittable/jumpable).\n"
+        "You must strictly follow the steps below to judge, and may only answer: \"yes\" or \"no\", do not output any other content.\n\n"
+        "Step 1: Judge whether the image is \"object-centric with a clear subject\"\n"
+        "Only when all of the following conditions are satisfied at the same time is the image considered \"object-centric with a clear subject\":\n"
+        "1. The visual attention of the image is focused on a single main object, or on a few strongly related objects, rather than:\n"
+        "   - A broad outdoor / indoor large scene (street, plaza, beach, scenery, full room panorama, etc.);\n"
+        "   - A crowded crowd, a complex street scene, a shopping mall, or other multi-target mixed scenes;\n"
+        "   - A scene centered on a person or animal, where the object is only a small accessory or background.\n"
+        "2. The main object is located at the center or a prominent region of the image, and:\n"
+        "   - It occupies a noticeable area in the frame (not a tiny dot-like target in the distance);\n"
+        "   - Its outline and shape are clearly visible, with no severe occlusion or large-area cropping.\n"
+        "3. The main object should be an independent, recognizable physical object, rather than:\n"
+        "   - The ground, walls, ceiling, stairs, steps, railings, pillars, stone blocks, rocks, snow piles, dirt mounds, platforms, or other environmental structures or natural terrain;\n"
+        "   - Abstract geometric shapes, textures, patterns, signboards, road markings, clouds, scenery, etc.\n"
+        "If the image fails to satisfy any one of the above (for example: a large scene, an unclear subject, an object that is too small, only environmental structures, etc.), please answer directly: \"no\".\n\n"
+        "Step 2: Judge whether the main object is a \"typical everyday interactable object\" and has a human-executable Affordance\n"
+        "Only proceed to Step 2 after passing Step 1.\n"
+        "1. The main object must be a typical everyday man-made object or a common edible object, with a category similar to the following kinds of items:\n"
+        "   - Furniture and supports: chair, couch, bench, bed, etc.;\n"
+        "   - Tableware and containers: cup, bottle, bowl, plate, spoon, fork, knife, wine_glass, etc.;\n"
+        "   - Kitchen / home appliances: microwave, oven, refrigerator, etc.;\n"
+        "   - Handheld tools and stationery: pen, scissors, hammer, axe, toothbrush, etc.;\n"
+        "   - Electronic devices: cell_phone, camera, laptop, keyboard, etc.;\n"
+        "   - Vehicles: bicycle, motorcycle, etc.;\n"
+        "   - Sports equipment and balls: soccer_ball, basketball, baseball, tennis_racket, golf_clubs, baseball_bat, badminton, frisbee, "
+        "javelin, discus, skis, snowboard, skateboard, punching_bag, etc.;\n"
+        "   - Luggage and containers: suitcase, etc.;\n"
+        "   - Common foods: apple, banana, orange, carrot, broccoli, hot_dog, etc.\n"
+        "   If the main object is clearly an environmental structure, natural terrain, or a hard-to-name abstract shape "
+        "(for example: pillars, stone blocks, steps, stairs, snow piles, rocks, random platforms, floors, walls, etc.), "
+        "then even if it \"looks like it can be sat on / jumped on / kicked\", it should be regarded as not meeting this task's requirement, and you should answer directly: \"no\".\n"
+        "2. When the main object belongs to the above \"typical everyday objects\", further judge whether, in a normal life context, it naturally supports any one of the following human actions "
+        "(the Affordance labels are written in English):\n"
         "Push, Drink_with, Take_photo, Brush_with, Swing, Talk_on, Beat, Ride, Wash, Pour, Open, Cut, Eat, Look_out, Lie_on, "
         "Stir, Boxing, Hit, Pick_up, Cut_with, Throw, Catch, Text_on, Sit_on, Pack, Drag, Hold, Write, Kick, Peel, Lift, Stick, "
         "Type_on, Sip, Carry, Jump\n"
-        "判断原则：\n"
-        "   - 只考虑该物体在日常、常规用法下是否会被人类这样使用；\n"
-        "   - 不要依赖夸张、危险或极端的用法，也不要通过纯粹想象“看起来也可以”来推断；\n"
-        "   - 例如：椅子用来 Sit_on，杯子/酒杯/勺子用来 Drink_with / Sip，手机用来 Take_photo / Talk_on / Text_on，"
-        "键盘和笔记本电脑用来 Type_on，刀/剪刀用来 Cut_with，球类用来 Kick / Throw / Catch 等，都是合理的典型情况。\n\n"
-        "若同时满足：\n"
-        "(1) 图像以一个主要物体为视觉中心、主体清晰（第 1 步为“是”）；\n"
-        "(2) 该物体属于上述“典型日常可交互物体”，且在正常生活中自然地支持至少一种上述 Affordance（第 2 步为“是”）；\n"
-        "则请只回答：是\n"
-        "其他任何情况（包括：主体是柱子、石头、台阶、雪堆等环境结构；主体无法清晰归类到常见日常物体；"
-        "或者只能通过联想/引申才认为可以坐/踢/跳），请只回答：否\n"
-        "不要输出任何其他内容（包括解释、符号、置信度或多余文字）。"
+        "Judgment principles:\n"
+        "   - Only consider whether, under everyday, normal usage, the object would be used by humans in this way;\n"
+        "   - Do not rely on exaggerated, dangerous, or extreme usages, and do not infer through pure imagination that \"it looks like it could also\";\n"
+        "   - For example: a chair is used for Sit_on, a cup/wine glass/spoon is used for Drink_with / Sip, a phone is used for Take_photo / Talk_on / Text_on, "
+        "a keyboard and a laptop are used for Type_on, a knife/scissors is used for Cut_with, a ball is used for Kick / Throw / Catch, etc., which are all reasonable typical cases.\n\n"
+        "If all of the following are satisfied at the same time:\n"
+        "(1) The image is visually centered on a single main object with a clear subject (Step 1 is \"yes\");\n"
+        "(2) The object belongs to the above \"typical everyday interactable objects\" and, in normal life, naturally supports at least one of the above Affordances (Step 2 is \"yes\");\n"
+        "then please answer only: yes\n"
+        "In any other case (including: the subject is a pillar, stone, step, snow pile, or other environmental structure; the subject cannot be clearly classified into a common everyday object; "
+        "or it can be considered sittable/kickable/jumpable only through association/extrapolation), please answer only: no\n"
+        "Do not output any other content (including explanations, symbols, confidence scores, or extra text)."
     )
 
     print(f"CUDA_VISIBLE_DEVICES={os.environ.get('CUDA_VISIBLE_DEVICES')}")
@@ -271,7 +271,7 @@ def main():
 
     sampling_params = SamplingParams(
         temperature=0.0,
-        max_tokens=3200,   # D 保持不变
+        max_tokens=3200,   # D: keep unchanged
         top_k=-1,
         stop_token_ids=[],
     )

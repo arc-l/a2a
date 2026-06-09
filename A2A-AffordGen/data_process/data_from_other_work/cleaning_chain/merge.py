@@ -2,22 +2,22 @@ import json
 from pathlib import Path
 
 # =========================
-# 固定配置写在这里（不使用 argparse）
+# Fixed config here (no argparse)
 # =========================
 OUT_ROOT = Path("data/data00")
 MANIFEST_JSONL = Path("data/data00/obj365_yes_ann_train/manifest.jsonl")
 
-# 第一轮输出文件命名规则（你给的第一轮脚本）
+# Naming rule for round-1 output files (the round-1 script you provided)
 ROUND1_PATTERN = "object365_patch*_round1_aff_select.jsonl"
 
-# 合并后的输出，避免重名覆盖
-MERGED_SUFFIX = "_merged_v1"  # 会生成：object365_patchX_round1_aff_select_merged_v1.jsonl
+# Merged output, to avoid overwriting due to name collisions
+MERGED_SUFFIX = "_merged_v1"  # Produces: object365_patchX_round1_aff_select_merged_v1.jsonl
 
-# bbox 注入格式精度（决定“name + coordinates”字符串长相；后续 VLM 必须逐字复刻）
+# bbox injection format precision (determines the look of the "name + coordinates" string; the downstream VLM must reproduce it verbatim)
 COORD_DECIMALS = 2
 
 # =========================
-# 读取 manifest 索引（一次性）
+# Load the manifest index (one-time)
 # =========================
 def load_manifest_index(manifest_jsonl: Path):
     idx = {}
@@ -35,7 +35,7 @@ def load_manifest_index(manifest_jsonl: Path):
                 if not ip:
                     bad += 1
                     continue
-                # 这里的 labels 是你在数据处理脚本里写入的：[{cid,name,xywhn,area}, ...]
+                # Here labels are what you wrote in the data-processing script: [{cid,name,xywhn,area}, ...]
                 idx[ip] = rec
             except Exception:
                 bad += 1
@@ -43,7 +43,7 @@ def load_manifest_index(manifest_jsonl: Path):
     return idx
 
 # =========================
-# 几何转换
+# Geometry conversion
 # =========================
 def xywhn_to_xyxy(xywhn, W: int, H: int):
     cx, cy, w, h = [float(x) for x in xywhn]
@@ -64,7 +64,7 @@ def fmt_xyxy(xyxy, nd=2):
     return f"[{s.format(x1)},{s.format(y1)},{s.format(x2)},{s.format(y2)}]"
 
 # =========================
-# 为某个 object_name 收集该图中所有同名实例的 bbox，并生成“name + coordinates”唯一标识字符串
+# For a given object_name, collect the bboxes of all same-named instances in the image, and generate the unique "name + coordinates" identifier string
 # =========================
 def collect_object_instances(manifest_rec: dict, object_name: str, nd=2):
     W = int(manifest_rec.get("width", 0) or 0)
@@ -91,7 +91,7 @@ def collect_object_instances(manifest_rec: dict, object_name: str, nd=2):
         area = float(a.get("area", float(xywhn[2]) * float(xywhn[3])))
         matched.append((area, [float(x) for x in xywhn]))
 
-    # 面积从大到小，稳定且更像“主实例优先”
+    # Sort by area from large to small; stable and more like "primary instance first"
     matched.sort(key=lambda t: t[0], reverse=True)
 
     instances_xywhn = [m[1] for m in matched]
@@ -109,7 +109,7 @@ def collect_object_instances(manifest_rec: dict, object_name: str, nd=2):
     }
 
 # =========================
-# 合并：round1 -> merged（批量）
+# Merge: round1 -> merged (batch)
 # =========================
 def merge_one_file(round1_path: Path, manifest_idx: dict):
     out_path = round1_path.with_name(round1_path.stem + MERGED_SUFFIX + round1_path.suffix)
@@ -142,12 +142,12 @@ def merge_one_file(round1_path: Path, manifest_idx: dict):
             mrec = manifest_idx[ip]
             n_ok += 1
 
-            # 把图像尺寸补进第一轮 result（第二轮只读第一轮结果时就能拿到）
+            # Add the image dimensions into the round-1 result (so round 2 can get them even when only reading round-1 results)
             result = rec.get("result", {})
             if not isinstance(result, dict):
                 result = {}
 
-            # 你后续同意的“name + coordinates”唯一标识，核心就在这里：instances 字符串列表
+            # The "name + coordinates" unique identifier you agreed on later; the core is right here: the instances string list
             result["image_width"] = int(mrec.get("width", 0) or 0)
             result["image_height"] = int(mrec.get("height", 0) or 0)
 
@@ -162,13 +162,13 @@ def merge_one_file(round1_path: Path, manifest_idx: dict):
 
                     pack = collect_object_instances(mrec, obj, nd=COORD_DECIMALS)
 
-                    # 这三个字段就是你第二轮 prompt 注入要用的：
-                    # item["instances"] 让 VLM 按行逐字引用（含坐标）来 disambiguate
-                    # item["image_width/height"] 如果你想在 prompt 里写尺寸，也可用 result 里的
+                    # These three fields are what your round-2 prompt injection will use:
+                    # item["instances"] lets the VLM quote line by line verbatim (including coordinates) to disambiguate
+                    # item["image_width/height"] if you want to write the dimensions in the prompt, you can also use the ones in result
                     item["instances"] = pack["instances"]
 
-                    # 如果你第二轮还想做 bbox 质量/尺度的更强约束，可用这些“数值字段”做 rubic
-                    # 但你说不想让模型输出 bbox，这里只是给 prompt 内部使用
+                    # If in round 2 you also want stronger constraints on bbox quality/scale, you can use these "numeric fields" as a rubric
+                    # But since you said you don't want the model to output bbox, these are only for internal prompt use
                     item["instances_xyxy"] = pack["instances_xyxy"]
                     item["instances_area"] = pack["instances_area"]
 
