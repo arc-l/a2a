@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.ipynb_checkpoints/
+
+# Data, models, runs — host these externally, never commit
+data/
+models/
+runs/
+output*/
+*.pt
+*.pth
+*.safetensors
+*.jsonl
+*.zarr/
+
+# Logs / scratch
+*.log
+/tmp/

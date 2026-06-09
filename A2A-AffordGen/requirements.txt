@@ -1,0 +1,20 @@
+# A2A-AffordGen — core Python dependencies (data processing + inference utils).
+#
+# NOTE: a few components are installed separately (see README "Installation"):
+#   - PyTorch          (match your CUDA; install from pytorch.org)
+#   - ms-swift         (training backend: `pip install ms-swift`)
+#   - vLLM             (labeler-VLM server: `pip install vllm`)
+#   - sam3             (the A2A-GroundingModel / SAM3-I package — provides `sam3.*`)
+#   - isegm            (SimpleClick — provides `isegm.inference.clicker.Clicker`)
+#
+# The exact frozen environment we used is pinned in env.full.txt.
+
+numpy<2                 # sam3 / swift require numpy 1.x (we used 1.26.4)
+pillow
+opencv-python-headless
+pycocotools
+matplotlib
+tqdm
+requests
+openai>=1.0             # OpenAI-compatible client for the local vLLM Qwen3-VL server
+transformers            # inference loads the fine-tuned Qwen-VL checkpoint
