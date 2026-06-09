@@ -2,7 +2,7 @@
 # ============================================================================
 # A2A-AffordGen — Zero-shot SAM3 + text baseline (no agent, no clicks)
 # ----------------------------------------------------------------------------
-# Prompts SAM3 directly with the part description, with no SegAgent VLM and no
+# Prompts SAM3 directly with the part description, with no AffordGen VLM and no
 # iterative clicking. Useful as the lower bound to compare the trained agent
 # against on the same validation manifest. See ../README.md.
 #

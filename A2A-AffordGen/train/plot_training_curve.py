@@ -4,7 +4,7 @@ Plot train/val loss and learning rate curves from a Swift logging.jsonl.
 
 Usage:
     python plot_training_curve.py \
-        data/affordance/segagent_ckpt_0511/v13-20260511-130834/logging.jsonl
+        data/affordance/affordgen_ckpt_0511/v13-20260511-130834/logging.jsonl
 
 Output: loss_curve.png (and optionally token_acc_curve.png) saved next to the jsonl.
 """

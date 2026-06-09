@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Baseline: SAM3 with text prompt only (no SegAgent VLM, no iterative clicks).
+Baseline: SAM3 with text prompt only (no AffordGen VLM, no iterative clicks).
 
 For every test case in val_manifest.jsonl:
     SAM3.set_text_prompt(description)  ->  {masks, boxes, scores}
@@ -8,7 +8,7 @@ For every test case in val_manifest.jsonl:
     compute IoU vs GT mask
 
 Writes the same metrics_summary.json / metrics_per_image.json shape as
-infer_segagent.py (but only the "best-step" / "step0" / "final" all collapse
+infer_affordgen.py (but only the "best-step" / "step0" / "final" all collapse
 to the single SAM3 prediction since there's no iteration).
 
 Usage:
@@ -203,7 +203,7 @@ def main():
             print(f"  [ERROR] {ex}")
             import traceback; traceback.print_exc()
 
-    # ── Summary (same metrics shape as infer_segagent.py) ─────────────────────
+    # ── Summary (same metrics shape as infer_affordgen.py) ─────────────────────
     if not metric_rows:
         print("\n[WARN] no metrics produced")
         return
@@ -223,7 +223,7 @@ def main():
         "method": "SAM3+text (zero-shot baseline)",
         "evaluated_images": int(len(metric_rows)),
         "requested_images": int(len(entries)),
-        # Same field names as infer_segagent so cross-method aggregation scripts work.
+        # Same field names as infer_affordgen so cross-method aggregation scripts work.
         # All three groups (best/step0/final) are identical here -- one-shot baseline.
         "gIoU":          float(ious.mean() * 100.0),
         "cIoU":          ciou(inters, unions),

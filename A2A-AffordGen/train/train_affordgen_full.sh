@@ -1,22 +1,22 @@
 #!/bin/bash
 # ============================================================================
-# A2A-AffordGen — Train the SegAgent annotator (FULL fine-tune)
+# A2A-AffordGen — Train the AffordGen annotator (FULL fine-tune)
 # ----------------------------------------------------------------------------
 # Fine-tunes a Qwen-VL backbone to predict the next click point that refines a
 # part mask, from the human-like click-trajectory data produced by
-# data_process/gen_segagent_train_data.py. Uses ms-swift (DeepSpeed ZeRO-3).
+# data_process/gen_affordgen_train_data.py. Uses ms-swift (DeepSpeed ZeRO-3).
 # See ../README.md for the full pipeline.
 #
 # All paths are overridable via environment variables, e.g.:
-#   BASE_MODEL=/path/to/Qwen3.5-9B OUTPUT_DIR=runs/full bash train_segagent_full.sh
+#   BASE_MODEL=/path/to/Qwen3.5-9B OUTPUT_DIR=runs/full bash train_affordgen_full.sh
 # ============================================================================
 set -e
 
 CONDA_ENV=${CONDA_ENV:-affordance}
 BASE_MODEL=${BASE_MODEL:-models/Qwen3.5-9B}                          # HF dir of the VL backbone
-TRAIN_JSONL=${TRAIN_JSONL:-data/affordance/segagent_train/train_step0_3x.jsonl}
-VAL_JSONL=${VAL_JSONL:-data/affordance/segagent_train/val.jsonl}
-OUTPUT_DIR=${OUTPUT_DIR:-runs/segagent_full}
+TRAIN_JSONL=${TRAIN_JSONL:-data/affordance/affordgen_train/train_step0_3x.jsonl}
+VAL_JSONL=${VAL_JSONL:-data/affordance/affordgen_train/val.jsonl}
+OUTPUT_DIR=${OUTPUT_DIR:-runs/affordgen_full}
 GPUS=${CUDA_VISIBLE_DEVICES:-0,1}
 NPROC=${NPROC:-2}
 MASTER_PORT=${MASTER_PORT:-29500}

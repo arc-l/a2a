@@ -57,8 +57,8 @@ import pycocotools.mask as mask_util
 
 # ── Project path setup ────────────────────────────────────────────────────────
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-SAM3_ROOT = PROJECT_ROOT / "sam3"
-SIMPLECLICK_ROOT = PROJECT_ROOT / "third_party" / "SimpleClick"
+SAM3_ROOT = PROJECT_ROOT / "sam3"                               # A2A-GroundingModel / SAM3-I repo (clone here or pip-install)
+SIMPLECLICK_ROOT = PROJECT_ROOT / "third_party" / "SimpleClick" # clone SimpleClick here (see third_party/README.md)
 
 for p in [str(PROJECT_ROOT), str(SAM3_ROOT), str(SIMPLECLICK_ROOT)]:
     if p not in sys.path:

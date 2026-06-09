@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-infer_segagent.py — Multi-step SegAgent inference demo.
+infer_affordgen.py — Multi-step AffordGen inference demo.
 
 Pipeline per image:
   step 0 : original image  → VLM → click → SAM3 → mask
@@ -8,12 +8,12 @@ Pipeline per image:
   ...until max_steps or predicted_next_iou >= stop_iou
 
 Usage:
-    python infer_segagent.py \
-        --ckpt   data/affordance/segagent_ckpt_0511/v13-20260511-130834/checkpoint-500 \
+    python infer_affordgen.py \
+        --ckpt   data/affordance/affordgen_ckpt_0511/v13-20260511-130834/checkpoint-500 \
         --sam3   models/sam3/sam3.pt \
-        --val_jsonl data/affordance/segagent_train/val.jsonl \
+        --val_jsonl data/affordance/affordgen_train/val.jsonl \
         --img_dir   data/affordance/train_and_val/val_set/images \
-        --out_dir   vis_segagent_demo \
+        --out_dir   vis_affordgen_demo \
         --n_images  20 \
         --max_steps 8 \
         --gpu 0
@@ -302,7 +302,7 @@ def build_vlm(ckpt: str, device: str):
         if n_lora == 0:
             print("  [ERROR] adapter loaded but ZERO LoRA modules attached. "
                   "target_modules regex likely doesn't match the runtime model "
-                  "structure. Inference will run the BASE model (no SegAgent format).")
+                  "structure. Inference will run the BASE model (no AffordGen format).")
         # ----------------------------------------------------------------
 
         # Merge adapter into base for inference-time speed; do not call save.
@@ -423,7 +423,7 @@ def sam3_predict(sam3_model, sam3_processor, orig_image: Image.Image,
 
 
 # ── Per-image multi-step inference ────────────────────────────────────────────
-def run_segagent(orig_image: Image.Image, description: str,
+def run_affordgen(orig_image: Image.Image, description: str,
                  vlm_model, vlm_processor, sam3_model, sam3_processor,
                  device: str, max_steps: int = 16, stop_iou: float = 0.97,
                  sam3_thresh: float = 0.49,
@@ -472,7 +472,7 @@ def run_segagent(orig_image: Image.Image, description: str,
             "real_inter": None, "real_union": None,
             # Filled in at step 0 of the loop: VLM's own evaluation of the
             # SAM3 seed mask it sees in the overlay. Used by delta-gating
-            # routing in infer_segagent_multi_instance.py.
+            # routing in infer_affordgen_multi_instance.py.
             "vlm_seed_score": None,
         })
 
@@ -684,7 +684,7 @@ def run_with_manifest(args, out_dir: Path, device: str, gpu_id: int):
                 print(f"  [ERROR] failed to load GT mask: {mask_path}")
                 continue
 
-            steps = run_segagent(
+            steps = run_affordgen(
                 orig_image, description,
                 vlm_model, vlm_processor, sam3_model, sam3_processor,
                 device=device,
@@ -813,7 +813,7 @@ def main():
                     help="val_manifest.jsonl with pre-resolved image_path + gt_mask_path "
                          "per (image, description) test case. Recommended.")
     ap.add_argument("--val_jsonl",
-                    default="data/affordance/segagent_train/val.jsonl",
+                    default="data/affordance/affordgen_train/val.jsonl",
                     help="(LEGACY) val.jsonl to read descriptions from. "
                          "Used only if --manifest is empty.")
     ap.add_argument("--img_dir",
@@ -933,7 +933,7 @@ def main():
             if gt_rec is not None:
                 gt_mask = load_mask_bool(gt_rec["mask_path"], image_size=orig_image.size)
 
-            steps = run_segagent(
+            steps = run_affordgen(
                 orig_image, description,
                 vlm_model, vlm_processor, sam3_model, sam3_processor,
                 device=device,

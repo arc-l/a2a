@@ -1,5 +1,5 @@
 """
-Generate SegAgent VLM fine-tuning data from filtered trajectory JSONs.
+Generate AffordGen VLM fine-tuning data from filtered trajectory JSONs.
 
 For each click step k in each trajectory:
   - Step 0 : original image (no mask overlay)
@@ -20,10 +20,10 @@ Prompt / answer format (Swift JSONL, Qwen3.5-compatible):
   next_iou    = IoU achieved by this click
 
 Usage:
-    python data_process/gen_segagent_train_data.py \\
+    python data_process/gen_affordgen_train_data.py \\
         --input_dir  dataset/trajs_dataset_after_filter \\
-        --output_dir data/affordance/segagent_train \\
-        --output_jsonl data/affordance/segagent_train/train.jsonl
+        --output_dir data/affordance/affordgen_train \\
+        --output_jsonl data/affordance/affordgen_train/train.jsonl
 """
 
 import argparse
@@ -180,8 +180,8 @@ def main():
                     help="image root for extra_jsons; overlays mirror its subdir structure")
     ap.add_argument("--extra_overlay_prefix", default=None,
                     help="prefix subdir under overlay_images for extra_jsons (e.g. affordance2act)")
-    ap.add_argument("--output_dir",   default="data/affordance/segagent_train")
-    ap.add_argument("--output_jsonl", default="data/affordance/segagent_train/train.jsonl")
+    ap.add_argument("--output_dir",   default="data/affordance/affordgen_train")
+    ap.add_argument("--output_jsonl", default="data/affordance/affordgen_train/train.jsonl")
     args = ap.parse_args()
 
     overlay_root = Path(args.output_dir) / "overlay_images"

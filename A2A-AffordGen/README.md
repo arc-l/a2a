@@ -15,7 +15,7 @@ A2A-AffordGen is the data engine behind **A2A-Bench**. It scales up
 scene-level, task-conditioned, one-to-many part-affordance annotation by pairing
 two models:
 
-1. **A SegAgent annotator** — a Qwen vision-language model fine-tuned to *act* as
+1. **An AffordGen annotator** — a Qwen vision-language model fine-tuned to *act* as
    an interactive segmentation agent. Given an image, a part description, and the
    current (semi-transparent green) mask, it predicts the next **click point**
    that improves the mask. [SAM3](https://github.com/facebookresearch/sam3) turns
@@ -29,7 +29,7 @@ two models:
    which is what makes the benchmark one-to-many.
 
 This folder contains everything needed to **(a) build the training/annotation
-data, (b) train the SegAgent annotator, and (c) evaluate it.** It does *not*
+data, (b) train the AffordGen annotator, and (c) evaluate it.** It does *not*
 ship model weights or datasets — see [Models & data](#models--data) for where to
 get those.
 
@@ -47,7 +47,7 @@ A2A-AffordGen/
 ├── data_process/                     # (1) build data
 │   ├── gen_object_crop_traj.py       #   part masks → cropped object → SAM3 click trajectory
 │   ├── gen_part_captions.py          #   caption each part with the labeler VLM
-│   ├── gen_segagent_train_data.py    #   trajectories → ms-swift JSONL (multi-step, mask overlays)
+│   ├── gen_affordgen_train_data.py    #   trajectories → ms-swift JSONL (multi-step, mask overlays)
 │   ├── gen_vlm_traj_data.py          #   trajectories → JSONL (single first-click variant)
 │   ├── validate_train_data.py        #   sanity-check the generated JSONL
 │   ├── build_val_gt_manifest.py      #   build the evaluation manifest (val_manifest.jsonl)
@@ -61,15 +61,16 @@ A2A-AffordGen/
 │       ├── orps_trps_chain/          #     object-referring (ORPS) + task-referring (TRPS) instructions
 │       └── instruct_part_label/      #     variant of the chain for InstructPart-style inputs
 ├── train/                            # (2) train the annotator (ms-swift)
-│   ├── train_segagent_full.sh        #   full fine-tune (DeepSpeed ZeRO-3)
-│   ├── train_segagent_lora.sh        #   LoRA fine-tune (DeepSpeed ZeRO-2)
+│   ├── train_affordgen_full.sh        #   full fine-tune (DeepSpeed ZeRO-3)
+│   ├── train_affordgen_lora.sh        #   LoRA fine-tune (DeepSpeed ZeRO-2)
 │   └── plot_training_curve.py        #   plot loss/eval curves from the run logs
 ├── inference/                        # (3) evaluate
-│   ├── infer_segagent.py             #   SegAgent + SAM3 click loop, reports IoU vs GT
-│   ├── run_infer_segagent_full.sh    #   wrapper for a full-finetune checkpoint
-│   ├── run_infer_segagent_lora.sh    #   wrapper for a LoRA checkpoint
+│   ├── infer_affordgen.py             #   AffordGen + SAM3 click loop, reports IoU vs GT
+│   ├── run_infer_affordgen_full.sh    #   wrapper for a full-finetune checkpoint
+│   ├── run_infer_affordgen_lora.sh    #   wrapper for a LoRA checkpoint
 │   ├── infer_sam3_text_baseline.py   #   zero-shot SAM3+text baseline (no agent)
 │   └── run_infer_sam3_text_baseline.sh
+├── third_party/                      # how to obtain external deps (SimpleClick, sam3) — not bundled
 ├── requirements.txt                  # core pip deps
 └── env.full.txt                      # exact frozen environment (reference)
 ```
@@ -102,9 +103,10 @@ pip install vllm
 #    Install the A2A-GroundingModel / SAM3-I package so that `import sam3` works.
 #    (https://github.com/facebookresearch/sam3 — or the A2A-GroundingModel release)
 
-# 6) SimpleClick, for the interactive Clicker used during trajectory generation.
-#    Provides `isegm.inference.clicker.Clicker`.
-#    (https://github.com/uncbiag/SimpleClick)
+# 6) SimpleClick — provides the interactive `isegm.inference.clicker.Clicker` used
+#    during trajectory generation. Clone it into third_party/ (not bundled here):
+#      git clone https://github.com/uncbiag/SimpleClick third_party/SimpleClick
+#    gen_object_crop_traj.py adds that path to sys.path. See third_party/README.md.
 ```
 
 > The exact versions we ran are pinned in `env.full.txt`. `numpy<2` is required
@@ -119,13 +121,13 @@ Nothing large is committed to this repo. The script defaults expect this layout
 
 ```
 models/
-├── Qwen3.5-9B/                 # VL backbone fine-tuned into the SegAgent annotator
+├── Qwen3.5-9B/                 # VL backbone fine-tuned into the AffordGen annotator
 ├── Qwen3-VL-32B-Instruct/      # labeler VLM (served via vLLM)
 └── sam3/sam3.pt                # SAM3 / A2A-GroundingModel checkpoint (click backend)
 
 data/
 └── affordance/
-    ├── segagent_train/         # train.jsonl / val.jsonl (built by data_process)
+    ├── affordgen_train/         # train.jsonl / val.jsonl (built by data_process)
     ├── train_and_val/val_set/  # images/, gt_mask/, val_manifest.jsonl (evaluation)
     └── ...                      # raw/intermediate data produced by the pipeline
 ```
@@ -141,19 +143,19 @@ data/
 ## Quick start (TL;DR)
 
 ```bash
-# A. Build the SegAgent training data from filtered click trajectories
-python data_process/gen_segagent_train_data.py \
+# A. Build the AffordGen training data from filtered click trajectories
+python data_process/gen_affordgen_train_data.py \
     --input_dir  data/affordance/trajs_dataset_after_filter \
-    --output_dir data/affordance/segagent_train \
-    --output_jsonl data/affordance/segagent_train/train.jsonl
+    --output_dir data/affordance/affordgen_train \
+    --output_jsonl data/affordance/affordgen_train/train.jsonl
 
 # B. Train the annotator (LoRA is the cheaper/safer default)
-BASE_MODEL=models/Qwen3.5-9B OUTPUT_DIR=runs/segagent_lora \
-    bash train/train_segagent_lora.sh
+BASE_MODEL=models/Qwen3.5-9B OUTPUT_DIR=runs/affordgen_lora \
+    bash train/train_affordgen_lora.sh
 
 # C. Evaluate it (agent + SAM3 click loop, reports IoU)
-CKPT=runs/segagent_lora/checkpoint-XXXX \
-    bash inference/run_infer_segagent_lora.sh
+CKPT=runs/affordgen_lora/checkpoint-XXXX \
+    bash inference/run_infer_affordgen_lora.sh
 ```
 
 The rest of this README explains each stage in detail.
@@ -165,7 +167,7 @@ The rest of this README explains each stage in detail.
 There are three sub-pipelines. Most users only need **1.1 + 1.2**; **1.3** is
 how we grew the benchmark by importing external affordance datasets.
 
-### 1.1 Build SegAgent training data (click-trajectory imitation)
+### 1.1 Build AffordGen training data (click-trajectory imitation)
 
 The annotator learns from *click trajectories*: sequences of (mask → click →
 better mask) steps that reach a target part mask.
@@ -197,17 +199,17 @@ better mask) steps that reach a target part mask.
    example (image + green overlay of the previous mask → predict the next
    point). This produces `train.jsonl` / `val.jsonl`:
    ```bash
-   python data_process/gen_segagent_train_data.py \
+   python data_process/gen_affordgen_train_data.py \
        --input_dir  data/affordance/trajs_dataset_after_filter \
-       --output_dir data/affordance/segagent_train \
-       --output_jsonl data/affordance/segagent_train/train.jsonl
+       --output_dir data/affordance/affordgen_train \
+       --output_jsonl data/affordance/affordgen_train/train.jsonl
    ```
    `gen_vlm_traj_data.py` is an alternative that emits only the first click per
    instance (no mask overlays) if you want a lighter, single-step dataset.
 
 4. **Validate**:
    ```bash
-   python data_process/validate_train_data.py --jsonl data/affordance/segagent_train/train.jsonl
+   python data_process/validate_train_data.py --jsonl data/affordance/affordgen_train/train.jsonl
    ```
 
 ### 1.2 Build the evaluation manifest
@@ -268,17 +270,17 @@ Qwen-VL backbone on `train.jsonl`. Two recipes are provided:
 ```bash
 # LoRA (frozen backbone, recommended default — keeps base grounding ability)
 BASE_MODEL=models/Qwen3.5-9B \
-TRAIN_JSONL=data/affordance/segagent_train/train.jsonl \
-OUTPUT_DIR=runs/segagent_lora \
+TRAIN_JSONL=data/affordance/affordgen_train/train.jsonl \
+OUTPUT_DIR=runs/affordgen_lora \
 CUDA_VISIBLE_DEVICES=0,1 \
-    bash train/train_segagent_lora.sh
+    bash train/train_affordgen_lora.sh
 
 # Full fine-tune (DeepSpeed ZeRO-3)
 BASE_MODEL=models/Qwen3.5-9B \
-TRAIN_JSONL=data/affordance/segagent_train/train_step0_3x.jsonl \
-OUTPUT_DIR=runs/segagent_full \
+TRAIN_JSONL=data/affordance/affordgen_train/train_step0_3x.jsonl \
+OUTPUT_DIR=runs/affordgen_full \
 CUDA_VISIBLE_DEVICES=0,1 \
-    bash train/train_segagent_full.sh
+    bash train/train_affordgen_full.sh
 ```
 
 Override any of `BASE_MODEL`, `TRAIN_JSONL`, `VAL_JSONL`, `OUTPUT_DIR`,
@@ -288,7 +290,7 @@ hyper-parameters live inside the scripts. Checkpoints are written to
 
 ```bash
 # Plot loss / eval curves from a run (pass ms-swift's logging.jsonl)
-python train/plot_training_curve.py runs/segagent_lora/<run>/logging.jsonl
+python train/plot_training_curve.py runs/affordgen_lora/<run>/logging.jsonl
 ```
 
 > **Note on `train_step0_3x.jsonl`** — the full-finetune recipe oversamples the
@@ -300,24 +302,24 @@ python train/plot_training_curve.py runs/segagent_lora/<run>/logging.jsonl
 
 ## 3. Testing / evaluation
 
-### SegAgent annotator (agent + SAM3 click loop)
+### AffordGen annotator (agent + SAM3 click loop)
 
 Runs the trained VLM and SAM3 over the manifest, performing up to `--max_steps`
 clicks per image (stopping early at `--stop_iou`), and reports IoU against the
 ground-truth masks:
 
 ```bash
-CKPT=runs/segagent_lora/checkpoint-2332 \
+CKPT=runs/affordgen_lora/checkpoint-2332 \
 SAM3_CKPT=models/sam3/sam3.pt \
 MANIFEST=data/affordance/train_and_val/val_set/val_manifest.jsonl \
 N_IMAGES=1167 \
-    bash inference/run_infer_segagent_lora.sh     # or run_infer_segagent_full.sh
+    bash inference/run_infer_affordgen_lora.sh     # or run_infer_affordgen_full.sh
 ```
 
 Or call the script directly for the full option list:
 
 ```bash
-python inference/infer_segagent.py \
+python inference/infer_affordgen.py \
     --ckpt CKPT --sam3 models/sam3/sam3.pt \
     --manifest MANIFEST --n_images 100 --max_steps 8 --stop_iou 0.97 --gpu 0
 ```
@@ -341,10 +343,10 @@ step; `images` lists the image(s) referenced by the `<image>` token:
     {"role": "user", "content": "<image>\nPlease optimize the semi-transparent green mask ... The object description is as follows: <ref>handle of the jug</ref>"},
     {"role": "assistant", "content": "<ref>handle of the jug</ref> Current IOU: 0.94, Positive point: (412, 530), Predicted next IOU: 0.97"}
   ],
-  "images": ["data/affordance/segagent_train/cropped_images/xxxx.jpg"]
+  "images": ["data/affordance/affordgen_train/cropped_images/xxxx.jpg"]
 }
 ```
-Click coordinates are integers; `gen_segagent_train_data.py` normalizes them to
+Click coordinates are integers; `gen_affordgen_train_data.py` normalizes them to
 `[0, 1000]` (`x = col/W*1000`, `y = row/H*1000`).
 
 **Evaluation manifest (`val_manifest.jsonl`)** — one record per part query:
