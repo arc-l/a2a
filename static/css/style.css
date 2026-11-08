@@ -274,10 +274,6 @@ figcaption {
   color: var(--muted);
   margin: -16px 0 28px;
 }
-.release-note {
-  max-width: 860px;
-  margin: 20px auto 0;
-}
 /* Centered lead line that introduces a media grid (needs room above) */
 .grid-lead {
   text-align: center;
