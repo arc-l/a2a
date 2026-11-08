@@ -135,9 +135,16 @@ data/
 | Asset | What it is | Where to get it |
 |---|---|---|
 | **AffordGen annotator (LoRA)** | Our trained checkpoint — load with `inference/infer_affordgen.py` | [Google Drive](https://drive.google.com/drive/folders/1Sfw3K5qpygvPqQ-WrcuzXvrlYSLwtfef?usp=drive_link) |
-| **A2A-Bench** | The released benchmark (images, masks, instructions, splits) | Released separately — see the [project page](https://arc-l.github.io/a2a/) |
-| **SAM3 checkpoint** | Click backend + text baseline | A2A-GroundingModel / SAM3-I release |
+| **AffordGen training data** | 149,134 training records with RGB/overlay images | [Rutgers Box](https://rutgers.box.com/s/inc77v41aehwfdyp6utwmxpmhrwo1j2p); [extraction and path instructions](../A2A-Bench#download) |
+| **A2A-Bench training pool** | 43,179 grounding training records with images and masks; evaluation annotations pending | [Training release](../A2A-Bench#download) |
+| **A2A-GroundingModel weights** | Fine-tuned SAM3-I grounding checkpoint | [Download and compatibility notes](../A2A-GroundingModel) |
 | **Qwen3.5-9B**, **Qwen3-VL-32B-Instruct** | Base models | Their official model hubs |
+
+The Box release contains `A2A-AffordGen-train/train.jsonl` with `messages` and
+`images` fields. Image paths are relative to the manifest directory and use the
+shared `../assets/` tree. Resolve these paths before handing records to a training
+tool that expects absolute paths. Only training records are included; validation
+and test annotations are not part of this download.
 
 ---
 

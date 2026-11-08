@@ -12,12 +12,12 @@ built with [A2A-AffordGen](../A2A-AffordGen)
 
 ---
 
-> **Status: dataset card / format spec.** The annotations and images are being
-> packaged for hosting on Hugging Face / ModelScope. This folder documents the
-> schema, structure, and a reference loader so you can integrate A2A-Bench as
-> soon as the data is up. Download links are filled in under
-> [Download](#download). Maintainers: see the
-> [pre-publish checklist](#maintainer-checklist-before-publishing).
+> **Status: training release available.** Download the grounding training pool
+> and AffordGen training records from
+> [Rutgers Box](https://rutgers.box.com/s/inc77v41aehwfdyp6utwmxpmhrwo1j2p).
+> Validation and test annotations remain pending. The current archive layout and
+> JSONL schema are documented under [Download](#download); the historical
+> annotation/evaluation formats below are not the layout of this training release.
 
 A2A-Bench targets **task-conditioned part affordance grounding** in everyday,
 multi-object scenes. Unlike grasp-only or object-level affordance datasets, it
@@ -26,10 +26,11 @@ covers the **one-to-many** setting: the same object can afford different
 interactions across tasks, and a single task can map to *multiple* valid
 functional regions in a cluttered scene.
 
-Each annotation links an **object → part → affordance → action** and provides
-**six instruction phrasings** that span the spectrum from *task-referring*
+The historical annotation format links an **object → part → affordance → action**
+and provides **six instruction phrasings** that span the spectrum from *task-referring*
 (implicit, "if I want to open the cabinet, which part …") to *object-referring*
-(explicit, "the handle of the cabinet").
+(explicit, "the handle of the cabinet"). The released training pool combines
+multiple source datasets, and its number of task phrasings varies by record.
 
 ## Highlights
 
@@ -42,17 +43,23 @@ Each annotation links an **object → part → affordance → action** and provi
 
 | Split | Content | Size |
 |---|---|---|
-| **InstructPart** (`all`) | 2,400 images · 2,400 annotated part instances · 2,400 masks · 6 instructions each | ~7 GB |
-| **Evaluation manifest** | 1,167 part queries, each with a ground-truth mask | ~2 GB |
-| **Training pool** | larger agent-annotated set (consolidated from the annotation batches) | _TODO: confirm final count_ |
+| **Grounding training pool** | 43,179 records; 97,498 referenced images/masks, including available scene-instance masks | Released |
+| **AffordGen training records** | 149,134 records; 108,309 referenced RGB/overlay images | Released |
+| **Validation / test annotations** | Being organized separately | Pending |
 
-> Numbers above are verified from the working set. The exact consolidated
-> **release** composition (final dedup + split boundaries) is finalized by the
-> maintainers before upload — see the checklist.
+> The two training datasets share 31,310 assets; the archives contain 174,497
+> unique resources. These counts describe the released training manifests, not
+> a finalized evaluation benchmark. Existing source splits are retained; source
+> train/validation image overlap has not been redefined, and image-level
+> disjointness is not certified.
 
 ---
 
-## Dataset structure
+## Historical annotation and evaluation formats
+
+The following layout describes the earlier annotation/evaluation tooling. For
+the released training ZIPs, use the [download layout](#download) and the
+`training-pool` loader option below.
 
 ```
 A2A-Bench/
@@ -68,8 +75,8 @@ A2A-Bench/
     └── annotations.json       # agent-annotated training records (same schema as data_all.json)
 ```
 
-> The hosted archive may differ slightly in top-level naming; the **schemas**
-> below are the contract that the reference loader and evaluation rely on.
+The legacy `instructpart`, `train`, and `eval` loader options use this layout.
+Their evaluation annotations are not included in the current training download.
 
 ### Annotation schema (`data_all.json`, `train/annotations.json`)
 
@@ -128,28 +135,72 @@ Grounding models are scored by mask IoU / P@0.5 of the predicted region against
 
 ## Download
 
-> _TODO (maintainer): publish and link the archives._
+[Download training data and model weights from Rutgers Box](https://rutgers.box.com/s/inc77v41aehwfdyp6utwmxpmhrwo1j2p).
 
-| Host | Link |
-|---|---|
-| 🤗 Hugging Face | `TODO: https://huggingface.co/datasets/<org>/A2A-Bench` |
-| 🪄 ModelScope | `TODO: https://www.modelscope.cn/datasets/<org>/A2A-Bench` |
+Download `A2A-Training-metadata.zip` and **all 15** files named
+`A2A-Training-assets-001-of-015.zip` through `A2A-Training-assets-015-of-015.zip`.
+Each ZIP is independently extractable; extract every ZIP into the same directory.
+The folder also contains the model weights, `README.txt`, `release-manifest.json`,
+`SHA256SUMS`, and a Windows checksum script. The complete data-and-model download
+is approximately 37.4 GB; allow about 80 GB for download plus extraction.
 
 ```bash
-# Example (after the HF dataset is published)
-huggingface-cli download <org>/A2A-Bench --repo-type dataset --local-dir ./A2A-Bench-data
+# Linux, from the folder containing the downloaded files
+sha256sum -c SHA256SUMS
+mkdir -p extracted
+for archive in A2A-Training-*.zip; do unzip -oq "$archive" -d extracted; done
 ```
+
+For Windows PowerShell, see the downloaded `README.txt` and `verify-downloads.ps1`.
+Every ZIP passed full CRC validation. Individual asset SHA256 hashes are included
+in the metadata ZIP.
+
+```text
+extracted/A2A-Training/
+├── A2A-Bench-training-pool/
+│   ├── train.jsonl
+│   ├── files.jsonl
+│   ├── dataset_info.json
+│   └── README.txt
+├── A2A-AffordGen-train/
+│   ├── train.jsonl
+│   ├── files.jsonl
+│   ├── dataset_info.json
+│   └── README.txt
+├── assets/                       # resources shared by both training datasets
+└── asset-integrity.jsonl          # paths relative to A2A-Training/
+```
+
+Paths in each dataset's `train.jsonl` and `files.jsonl` are **relative to that
+manifest's directory**, so `../assets/` resolves to the shared resource tree.
+Resolve them before passing records to tools that require absolute paths:
+
+```python
+image_path = (manifest_path.parent / row["image_path"]).resolve()
+```
+
+Grounding records contain `image_path`, `mask_path`, `object_name`, `part_name`,
+`part_phrase`, `affordance`, `tasks`, `source`, and `split`; some records also
+contain `instance_mask_paths` and `scene_instructions`. `mask_path` is the target
+union mask, and available per-instance masks are listed separately.
+AffordGen records contain `messages` and `images`, with the same relative-path
+convention. IoU values in AffordGen training messages are annotation-derived
+supervision, not an online ground-truth measurement interface.
+
+Only the existing training manifests and their referenced assets are included.
+Validation/test annotations and final evaluation packaging remain pending.
 
 ## Loading
 
 A dependency-light reference loader is provided:
 
 ```bash
-python load_a2a_bench.py --root ./A2A-Bench-data --split instructpart --stats
+python load_a2a_bench.py --root ./extracted/A2A-Training --split training-pool --stats
 ```
 
-See [`load_a2a_bench.py`](./load_a2a_bench.py) for iterating records, resolving
-image/mask paths, and reading the evaluation manifest.
+See [`load_a2a_bench.py`](./load_a2a_bench.py) for iterating the released grounding
+records and resolving image/mask paths. Its other options support the historical
+formats documented above.
 
 ---
 
@@ -174,21 +225,14 @@ source terms (or only where redistribution is permitted).
 
 ---
 
-## Maintainer checklist (before publishing)
+## Remaining release work
 
-- [ ] **Consolidate the release set** from the working dirs (`InstructPart/`,
-      `assign_task/` merged annotations, `train_and_val/val_set/`) into the
-      `InstructPart / eval / train` layout above; record final counts in the
-      table.
-- [ ] **Sanitize JSONs** — strip absolute/internal paths from annotation files
-      (e.g. `orig_image_path`, `output_files` entries point at internal machine
-      paths like `/home/.../...`); keep paths repo-relative.
-- [ ] **Resolve image redistribution** per source (Flickr/Objects365/COCO);
-      add `LICENSES.md`.
-- [ ] **Choose the annotation license** (CC BY 4.0 recommended).
-- [ ] **Upload** to Hugging Face and/or ModelScope; fill in the links above.
-- [ ] **Verify** `python load_a2a_bench.py --root <downloaded> --stats` runs and
-      counts match.
+- [x] Package the existing training manifests, with recorded counts and shared assets.
+- [x] Replace internal asset paths with portable relative paths and verify all references.
+- [x] Publish training resources and checksum manifests on Rutgers Box.
+- [ ] Organize and publish validation/test annotations and document final split boundaries.
+- [ ] Complete source-by-source attribution and licensing documentation.
+- [ ] Finalize the annotation license; this release does not relicense upstream images.
 
 ---
 

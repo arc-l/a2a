@@ -2,12 +2,17 @@
 """
 Reference loader for A2A-Bench.
 
-Loads the InstructPart-style annotations or the evaluation manifest, resolves
-image / mask paths relative to the dataset root, and (with --stats) prints a
-quick summary. Dependency-light: only the standard library is required; Pillow
-is used only if you ask it to open masks.
+Loads the released grounding training pool or historical annotations, resolves
+image / mask paths, and (with --stats) prints a quick summary. Only the standard
+library is required.
 
-Layout it expects (see README.md "Dataset structure"):
+Released training layout (see README.md "Download"):
+
+    <root>/
+      A2A-Bench-training-pool/train.jsonl
+      assets/
+
+Historical layouts, for the other split options:
 
     <root>/
       InstructPart/{data_all.json, images/, masks/}
@@ -15,14 +20,47 @@ Layout it expects (see README.md "Dataset structure"):
       train/annotations.json
 
 Examples:
+    python load_a2a_bench.py --root ./extracted/A2A-Training --split training-pool --stats
     python load_a2a_bench.py --root ./A2A-Bench-data --split instructpart --stats
     python load_a2a_bench.py --root ./A2A-Bench-data --split eval --stats
 """
 
 import argparse
 import json
+import os
 from collections import Counter
 from pathlib import Path
+
+
+def load_training_pool(root: Path):
+    """Yield grounding records from the shared-assets training ZIP release."""
+    manifest = root / "A2A-Bench-training-pool" / "train.jsonl"
+    base = manifest.parent.resolve()
+
+    def asset_path(relative):
+        # Normalize ../assets without stat-ing every image on network storage.
+        return Path(os.path.abspath(base / relative))
+
+    with manifest.open() as f:
+        for line in f:
+            if not line.strip():
+                continue
+            rec = json.loads(line)
+            yield {
+                "image": asset_path(rec["image_path"]),
+                "mask": asset_path(rec["mask_path"]),
+                "object": rec.get("object_name"),
+                "part": rec.get("part_name"),
+                "affordance": rec.get("affordance"),
+                "action": rec.get("action"),
+                "instructions": rec.get("tasks", []),
+                "instance_masks": [
+                    asset_path(path)
+                    for path in rec.get("instance_mask_paths", [])
+                ],
+                "source": rec.get("source"),
+                "record": rec,
+            }
 
 
 def load_instructpart(root: Path, split: str = "instructpart"):
@@ -93,7 +131,7 @@ def load_eval_manifest(root: Path):
 def main():
     ap = argparse.ArgumentParser(description="A2A-Bench reference loader")
     ap.add_argument("--root", type=Path, required=True, help="dataset root dir")
-    ap.add_argument("--split", choices=["instructpart", "train", "eval"],
+    ap.add_argument("--split", choices=["training-pool", "instructpart", "train", "eval"],
                     default="instructpart")
     ap.add_argument("--stats", action="store_true", help="print a summary")
     ap.add_argument("--limit", type=int, default=0, help="print first N records")
@@ -107,7 +145,8 @@ def main():
             print(r["description"], "->", r["gt_mask"].name)
         return
 
-    records = list(load_instructpart(args.root, args.split))
+    records = list(load_training_pool(args.root) if args.split == "training-pool"
+                   else load_instructpart(args.root, args.split))
     if args.stats:
         affs = Counter(r["affordance"] for r in records)
         objs = Counter(r["object"] for r in records)
@@ -117,7 +156,8 @@ def main():
         print(f"  unique affordances: {len(affs)}")
         print("  top affordances:   ", dict(affs.most_common(10)))
     for r in records[: args.limit or 0]:
-        print(f"{r['object']}/{r['part']} [{r['affordance']}/{r['action']}] "
+        action = f"/{r['action']}" if r.get("action") else ""
+        print(f"{r['object']}/{r['part']} [{r['affordance']}{action}] "
               f"<- {r['image'].name}  ({len(r['instructions'])} instructions)")
 
 
