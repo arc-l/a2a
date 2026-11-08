@@ -50,12 +50,18 @@ real-time grounding model (**A2A-GroundingModel**) and a manipulation policy (**
 [Download training data and weights from Rutgers Box](https://rutgers.box.com/s/inc77v41aehwfdyp6utwmxpmhrwo1j2p)
 (approximately 37.4 GB total).
 
+- [Training data — `data/train/`](https://rutgers.app.box.com/s/inc77v41aehwfdyp6utwmxpmhrwo1j2p/folder/435641893543): all 16 training ZIPs and extraction instructions.
+- [Model weights — `model/`](https://rutgers.app.box.com/s/inc77v41aehwfdyp6utwmxpmhrwo1j2p/folder/435640657467): grounding and policy weights, configurations, and compatibility notes.
+
+Each folder includes its own `SHA256SUMS` and `verify-downloads.ps1`; run checksum
+verification from the folder containing those downloaded files.
+
 | Artifact | Contents |
 |---|---|
-| `A2A-Training-assets-001-of-015.zip` through `015-of-015.zip`, plus `A2A-Training-metadata.zip` | 43,179 grounding training records and 149,134 AffordGen training records; 174,497 shared image/mask assets |
-| `A2A-GroundingModel.pt` | Fine-tuned grounding weights, with optimizer state removed |
-| `a2a_policy_libero_masked_tokens.pt` | LIBERO-Object Arm A1 masked_tokens policy, with configuration and action normalization |
-| `README.txt`, `SHA256SUMS`, `release-manifest.json` | Extraction instructions, file checksums, and release inventory |
+| `data/train/A2A-Training-assets-001-of-015.zip` through `015-of-015.zip`, plus `data/train/A2A-Training-metadata.zip` | 43,179 grounding training records and 149,134 AffordGen training records; 174,497 shared image/mask assets |
+| `model/A2A-GroundingModel.pt` | Fine-tuned grounding weights, with optimizer state removed |
+| `model/a2a_policy_libero_masked_tokens.pt` | LIBERO-Object Arm A1 masked_tokens policy, with configuration and action normalization |
+| `data/train/README.txt`, `model/MODELS_README.txt`, per-folder `SHA256SUMS` | Extraction instructions, model notes, and file checksums |
 
 Extract all 16 training ZIPs into the same directory; follow the
 [training-data instructions](./A2A-Bench#download) to resolve the shared asset paths.

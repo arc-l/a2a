@@ -14,7 +14,7 @@ built with [A2A-AffordGen](../A2A-AffordGen)
 
 > **Status: training release available.** Download the grounding training pool
 > and AffordGen training records from
-> [Rutgers Box](https://rutgers.box.com/s/inc77v41aehwfdyp6utwmxpmhrwo1j2p).
+> [Rutgers Box](https://rutgers.app.box.com/s/inc77v41aehwfdyp6utwmxpmhrwo1j2p/folder/435641893543).
 > Validation and test annotations remain pending. The current archive layout and
 > JSONL schema are documented under [Download](#download); the historical
 > annotation/evaluation formats below are not the layout of this training release.
@@ -135,17 +135,18 @@ Grounding models are scored by mask IoU / P@0.5 of the predicted region against
 
 ## Download
 
-[Download training data and model weights from Rutgers Box](https://rutgers.box.com/s/inc77v41aehwfdyp6utwmxpmhrwo1j2p).
+[Download training data from Rutgers Box (`data/train/`)](https://rutgers.app.box.com/s/inc77v41aehwfdyp6utwmxpmhrwo1j2p/folder/435641893543).
 
 Download `A2A-Training-metadata.zip` and **all 15** files named
 `A2A-Training-assets-001-of-015.zip` through `A2A-Training-assets-015-of-015.zip`.
 Each ZIP is independently extractable; extract every ZIP into the same directory.
-The folder also contains the model weights, `README.txt`, `release-manifest.json`,
-`SHA256SUMS`, and a Windows checksum script. The complete data-and-model download
-is approximately 37.4 GB; allow about 80 GB for download plus extraction.
+The training folder also contains `README.txt`, `SHA256SUMS`, and
+`verify-downloads.ps1`. Model weights and their separate checksum manifest are in
+[the `model/` folder](https://rutgers.app.box.com/s/inc77v41aehwfdyp6utwmxpmhrwo1j2p/folder/435640657467). The complete data-and-model download is
+approximately 37.4 GB; allow about 80 GB for download plus extraction.
 
 ```bash
-# Linux, from the folder containing the downloaded files
+# Linux, from the folder containing all downloaded training ZIPs and SHA256SUMS
 sha256sum -c SHA256SUMS
 mkdir -p extracted
 for archive in A2A-Training-*.zip; do unzip -oq "$archive" -d extracted; done

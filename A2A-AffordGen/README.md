@@ -135,7 +135,7 @@ data/
 | Asset | What it is | Where to get it |
 |---|---|---|
 | **AffordGen annotator (LoRA)** | Our trained checkpoint — load with `inference/infer_affordgen.py` | [Google Drive](https://drive.google.com/drive/folders/1Sfw3K5qpygvPqQ-WrcuzXvrlYSLwtfef?usp=drive_link) |
-| **AffordGen training data** | 149,134 training records with RGB/overlay images | [Rutgers Box](https://rutgers.box.com/s/inc77v41aehwfdyp6utwmxpmhrwo1j2p); [extraction and path instructions](../A2A-Bench#download) |
+| **AffordGen training data** | 149,134 training records with RGB/overlay images | [Rutgers Box](https://rutgers.app.box.com/s/inc77v41aehwfdyp6utwmxpmhrwo1j2p/folder/435641893543); [extraction and path instructions](../A2A-Bench#download) |
 | **A2A-Bench training pool** | 43,179 grounding training records with images and masks; evaluation annotations pending | [Training release](../A2A-Bench#download) |
 | **A2A-GroundingModel weights** | Fine-tuned SAM3-I grounding checkpoint | [Download and compatibility notes](../A2A-GroundingModel) |
 | **Qwen3.5-9B**, **Qwen3-VL-32B-Instruct** | Base models | Their official model hubs |

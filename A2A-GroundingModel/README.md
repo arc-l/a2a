@@ -3,7 +3,10 @@
 Fine-tuned grounding weights for Affordance2Action, implemented with
 [SAM3-I](https://github.com/debby-0527/SAM3-I).
 
-[Download from Rutgers Box](https://rutgers.box.com/s/inc77v41aehwfdyp6utwmxpmhrwo1j2p).
+[Download from the Rutgers Box `model/` folder](https://rutgers.app.box.com/s/inc77v41aehwfdyp6utwmxpmhrwo1j2p/folder/435640657467).
+
+The folder includes `SHA256SUMS` and `verify-downloads.ps1` for verifying all
+model files. Run verification from the downloaded model folder.
 
 | File | Purpose |
 |---|---|

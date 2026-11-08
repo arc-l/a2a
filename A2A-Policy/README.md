@@ -1,6 +1,9 @@
 # A2A-Policy: LIBERO simulation checkpoint
 
-[Download from Rutgers Box](https://rutgers.box.com/s/inc77v41aehwfdyp6utwmxpmhrwo1j2p).
+[Download from the Rutgers Box `model/` folder](https://rutgers.app.box.com/s/inc77v41aehwfdyp6utwmxpmhrwo1j2p/folder/435640657467).
+
+The folder includes `SHA256SUMS` and `verify-downloads.ps1` for verifying all
+model files. Run verification from the downloaded model folder.
 
 This release contains one **VLAUAD Arm A1 masked_tokens** policy for **LIBERO-Object**.
 It is not the Piper real-robot Explicit policy or a reproduction package for the
